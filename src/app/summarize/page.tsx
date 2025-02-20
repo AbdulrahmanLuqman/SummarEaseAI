@@ -10,10 +10,10 @@ interface Message {
 }
 export default function Summarize(){
     const date = new Date
-    const [messages, setMessages] = useState<Message[]>(
+    const [summary, setSummary] = useState<Message[]>(
         ()=> {
-            const messages = getItem("message")
-            return messages ? messages : [
+            const summary = getItem("summmary")
+            return summary ? summary : [
                 {
                     text: "Hello, pls make sure your words is not less than 150 characters",
                     sender: "AI",
@@ -24,8 +24,8 @@ export default function Summarize(){
     )
 
     useEffect(()=> {
-        setItem("message", messages)
-    }, [messages])
+        setItem("message", summary)
+    }, [summary])
     const [input, setInput] = useState("")
 
     const getSummary = (e: FormEvent<HTMLFormElement>)=> {
@@ -37,12 +37,12 @@ export default function Summarize(){
                 return
             }
     
-            const newMessages = [...messages, { text: input, sender: "user", date: `${date.getHours()}:${date.getMinutes()}` }]
-            setMessages(newMessages)
+            const newMessages = [...summary, { text: input, sender: "user", date: `${date.getHours()}:${date.getMinutes()}` }]
+            setSummary(newMessages)
             setInput("")
     
             setTimeout(()=> {
-                setMessages(
+                setSummary(
                     (prev) => [
                         ...prev, {
                             text: "Summarizing",
@@ -53,7 +53,7 @@ export default function Summarize(){
                 )
             }, 1000)
         } else {
-            setMessages(
+            setSummary(
                 (prev) => [
                     ...prev, {
                         text: "This Browser doesn't support this",
@@ -65,7 +65,7 @@ export default function Summarize(){
         }
     }
     const clearChat = ()=> {
-        setMessages([]);
+        setSummary([]);
     }
     
     
@@ -73,7 +73,7 @@ export default function Summarize(){
         <div className="w-full h-screen flex flex-col gap-3 items-center p-4">
             <div className="h-[80%] w-[800px]">
                 {
-                    messages.map((msg, index)=> 
+                    summary.map((msg, index)=> 
                         <div 
                           key={index}
                           className={`

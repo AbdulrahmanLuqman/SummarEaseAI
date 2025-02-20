@@ -26,8 +26,8 @@ export default function Translate(){
     ];
     const [messages, setMessages] = useState<Message[]>(
         ()=> {
-            const translations = getItem("translations")
-            return translations ? translations : [
+            const messages = getItem("messages")
+            return messages ? messages : [
                 {
                     text: "Hello, Let's do some translations",
                     sender: "AI",
@@ -38,7 +38,7 @@ export default function Translate(){
         }
     )
     useEffect(()=> {
-        setItem("translation", messages)
+        setItem("messages", messages)
     }, [messages])
 
     const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
