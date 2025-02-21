@@ -101,7 +101,13 @@ export default function Summarize(){
         }
     }
     const clearChat = ()=> {
-        setSummary([]);
+        setSummary([
+            {
+                text: "Hello, pls make sure your words is not less than 150 characters",
+                sender: "AI",
+                date: `${date.getHours()}:${date.getMinutes()}`
+            }
+        ]);
     }
     
     
