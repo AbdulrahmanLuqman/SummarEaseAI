@@ -46,7 +46,9 @@ export default function Translate(){
     };
 
     const translateText = async (text: string, sourceLang: string, targetLang: string) => {
-        if (typeof window === "undefined" || !window.ai?.translator) return text;
+        if (typeof window === "undefined" || !window.ai?.translator) {
+            return;
+        }
         try {
             const translator = await window.ai.translator.create({
                 sourceLanguage: sourceLang,
@@ -118,7 +120,7 @@ export default function Translate(){
         setIsLoading(true);
         try {
             const detectedResult = await detectLanguage(input);
-            const languageDetected = detectedResult?.language || "unknown";
+            const languageDetected = detectedResult?.language || "unavailable";
 
             const userMessage = {
                 text: input,
@@ -135,7 +137,7 @@ export default function Translate(){
                 && await translateText(input, languageDetected, selectedLanguage)
 
             const aiMessage = {
-                text: translatedAiResponse || "Translation unavailable",
+                text: translatedAiResponse || "Sorry, Translation is not available on this browser",
                 sender: "AI",
                 date: `${date.getHours()}:${date.getMinutes()}`,
                 detectedLanguage: selectedLanguage,
@@ -154,6 +156,8 @@ export default function Translate(){
     const clearChat = ()=> {
         setMessages([]);
     }
+
+    console.log(messages)
       
     return (
         <div className="w-full h-screen flex flex-col gap-5 items-center p-4">
@@ -163,17 +167,17 @@ export default function Translate(){
                     <div 
                       key={index}
                       className={`
-                        w-fit py-2 px-3 rounded-md text-white
+                        w-fit px-4 py-2 pb-6 rounded-md text-white relative
                         ${msg.sender === "user" ? "bg-blue-500 ml-auto" : "bg-blue-600 font-semibold"}
                       `}>
                         <p className="">
                             {
-                                msg.sender === "AI" && <span>{isLoading ? "Loading" : "Translation: "}</span>
+                                msg.sender === "AI" && <span>{isLoading ? "Loading: " : "Translation: "}</span>
                             }
                             {msg.text} 
                             <span className="font-normal">({msg.detectedLanguage})</span>
+                            
                         </p>
-
                         <span className="absolute bottom-1 right-2 text-sm font-normal">{msg.date}</span>
                     </div>
                     )

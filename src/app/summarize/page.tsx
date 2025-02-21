@@ -30,39 +30,27 @@ export default function Summarize(){
 
     const getSummary = (e: FormEvent<HTMLFormElement>)=> {
         e.preventDefault()
-        if ('ai' in self && 'summarizer' in self.ai) {
-            if(!input.trim) return
-            if(input.trim().length <= 10) {
-                alert("greater than this than pls")
-                return
-            }
-    
-            const newMessages = [...summary, { text: input, sender: "user", date: `${date.getHours()}:${date.getMinutes()}` }]
-            setSummary(newMessages)
-            setInput("")
-    
-            setTimeout(()=> {
-                setSummary(
-                    (prev) => [
-                        ...prev, {
-                            text: "Summarizing",
-                            sender: "AI",
-                            date: `${date.getHours()}:${date.getMinutes()}`
-                        }
-                    ]
-                )
-            }, 1000)
-        } else {
+        if(!input.trim) return
+        if(input.trim().length <= 10) {
+            alert("greater than this than pls")
+            return
+        }
+
+        const newMessages = [...summary, { text: input, sender: "user", date: `${date.getHours()}:${date.getMinutes()}` }]
+        setSummary(newMessages)
+        setInput("")
+
+        setTimeout(()=> {
             setSummary(
                 (prev) => [
                     ...prev, {
-                        text: "This Browser doesn't support this",
+                        text: "Sorry, I was unable to download the API, e pain me sha",
                         sender: "AI",
                         date: `${date.getHours()}:${date.getMinutes()}`
                     }
                 ]
             )
-        }
+        }, 1000)
     }
     const clearChat = ()=> {
         setSummary([]);
@@ -70,8 +58,8 @@ export default function Summarize(){
     
     
     return (
-        <div className="w-full h-screen flex flex-col gap-3 items-center p-4">
-            <div className="h-[80%] w-[800px]">
+        <div className="w-full h-screen flex flex-col gap-5 items-center p-4">
+            <div className="h-[80%] w-[800px] max-[800px]:w-full overflow-auto space-y-2">
                 {
                     summary.map((msg, index)=> 
                         <div 
@@ -96,7 +84,7 @@ export default function Summarize(){
                 <button className={`text-2xl p-2 w-fit bg-blue-400 hover:bg-blue-500 rounded-[50%] absolute bottom-2 right-2 ${input.trim().length <= 10 && "hidden"}`}><Send /></button>
             </form>
 
-            <button onClick={clearChat} className="absolute left-2 top-2 bg-red-500 text-white text-sm font-semibold py-2 px-4 rounded-md">Clear Chat</button>
+            <button onClick={clearChat} className="absolute right-2 top-2 bg-red-500 text-white text-sm font-semibold py-2 px-4 rounded-md">Clear Chat</button>
         </div>
     )
 }
