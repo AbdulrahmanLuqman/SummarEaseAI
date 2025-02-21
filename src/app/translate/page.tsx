@@ -2,6 +2,7 @@
 import { FormEvent, useState, useEffect } from "react"
 import { Send, Spinner } from "../components/Icons"
 import { getItem, setItem } from "../utils/localStorage"
+import Link from "next/link"
 
 interface Message {
     text: string;
@@ -206,6 +207,7 @@ export default function Translate(){
                 <input value={input} onChange={(e)=> setInput(e.target.value)} type="text" placeholder="Translate..." className="bg-transparent placeholder:font-semibold placeholder:text-[#0d3960] w-full p-2 outline-none" />
                 <button className={`text-2xl p-2 w-fit bg-blue-400 hover:bg-blue-500 rounded-[50%] absolute bottom-2 right-2 ${!input && "hidden"}`}><Send /></button>
             </form>
+            <Link href="/" className="absolute left-2 top-2 bg-blue-500 py-1 px-3 rounded-[.6rem] hover:bg-[#ebab16] border-b-[5px] border-r-[3px] border-[#0d3960] border-t-2 border-l-2 cursor-pointer"> Back </Link>
             <button onClick={clearChat} className="absolute right-2 top-2 bg-red-500 text-white text-sm font-semibold py-2 px-4 rounded-md">Clear Chat</button>
         </div>
     )
