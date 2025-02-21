@@ -60,7 +60,6 @@ interface AISummarizerCapabilities {
 }
 
 interface AISummarizer extends EventTarget {
-
   summarize(text: string, options?: { context?: string }): Promise<string>;
 
   destroy(): void;

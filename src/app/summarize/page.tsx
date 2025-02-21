@@ -1,7 +1,8 @@
 "use client"
 import { useState, useEffect, FormEvent } from "react"
-import { Send } from "../components/Icons"
+import { Send, Spinner } from "../components/Icons"
 import { getItem, setItem } from "../utils/localStorage"
+import { AISummarizerOptions } from "../../../global"
 
 interface Message {
     text: string,
@@ -9,6 +10,7 @@ interface Message {
     date: string
 }
 export default function Summarize(){
+    const [isLoading, setIsLoading] = useState(false)
     const date = new Date
     const [summary, setSummary] = useState<Message[]>(
         ()=> {
@@ -28,29 +30,75 @@ export default function Summarize(){
     }, [summary])
     const [input, setInput] = useState("")
 
-    const getSummary = (e: FormEvent<HTMLFormElement>)=> {
+    const summarizeText = async (text: string)=> {
+        if(typeof window === "undefined" || !window.ai?.summarizer) return;
+
+        try {
+            const options: AISummarizerOptions = {
+                sharedContext: 'This is a scientific article',
+                type: 'key-points',
+                format: 'markdown',
+                length: 'medium',
+            };
+
+            const summarizerCapabilities = await window.ai.summarizer.capabilities()
+            const canDetect = summarizerCapabilities?.available
+
+            if (canDetect === 'no') {
+              // The Summarizer API isn't usable.
+              return;
+            }
+            let summarizer
+            if (canDetect === 'readily') {
+              // The Summarizer API can be used immediately .
+              summarizer = await window.ai.summarizer.create(options);
+            } else {
+              // The Summarizer API can be used after the model is downloaded.
+              summarizer = await window.ai.summarizer.create(options);
+              summarizer.addEventListener("downloadprogress", (e: Event) => {
+                if ("loaded" in e && "total" in e) {
+                  const progressEvent = e as ProgressEvent;
+                  console.log(progressEvent.loaded, progressEvent.total);
+                }
+              });
+              await summarizer.ready;
+            }
+
+            const summary = await summarizer.summarize(text);
+
+            return summary
+        } catch(err) {
+            console.log("Summarizer Error:", err)
+        }
+    }
+    
+    const getSummary = async (e: FormEvent<HTMLFormElement>)=> {
         e.preventDefault()
-        if(!input.trim) return
         if(input.trim().length <= 10) {
-            alert("greater than this than pls")
             return
         }
-
-        const newMessages = [...summary, { text: input, sender: "user", date: `${date.getHours()}:${date.getMinutes()}` }]
-        setSummary(newMessages)
-        setInput("")
-
-        setTimeout(()=> {
+        setIsLoading(true)
+        try {
+            const newMessages = [...summary, { text: input, sender: "user", date: `${date.getHours()}:${date.getMinutes()}` }]
+            setSummary(newMessages)
+            setInput("")
+            const aiSummary = await summarizeText(input)
+    
             setSummary(
                 (prev) => [
                     ...prev, {
-                        text: "Sorry, I was unable to download the API, e pain me sha",
+                        text: aiSummary || "Sorry, this feature is not available on this browser",
                         sender: "AI",
                         date: `${date.getHours()}:${date.getMinutes()}`
                     }
                 ]
             )
-        }, 1000)
+        } catch (error) {
+            console.error("Error in translation process:", error);
+            setIsLoading(false);
+        } finally{
+            setIsLoading(false);
+        }
     }
     const clearChat = ()=> {
         setSummary([]);
@@ -59,13 +107,13 @@ export default function Summarize(){
     
     return (
         <div className="w-full h-screen flex flex-col gap-5 items-center p-4">
-            <div className="h-[80%] w-[800px] max-[800px]:w-full overflow-auto space-y-2">
+            <div className="h-[80%] w-[800px] max-[800px]:w-full overflow-auto space-y-2 pt-5">
                 {
                     summary.map((msg, index)=> 
                         <div 
                           key={index}
                           className={`
-                            w-fit max-w-[50%] px-4 py-2 pb-6 rounded-md text-white relative
+                            w-fit max-w-[90%] px-4 py-2 pb-6 rounded-md text-white relative
                             ${msg.sender === "user" ? "bg-blue-500 ml-auto": "bg-blue-600 font-semibold"}
                           `}
                         >
@@ -75,11 +123,12 @@ export default function Summarize(){
                         </div>
                     )
                 }
+                <span>{isLoading && <Spinner />}</span>
             </div>
             
 
 
-            <form onSubmit={getSummary} className="relative bg-blue-300 h-[20%] w-[800px] flex flex-col items-left rounded-[.6rem] border-b-[5px] border-r-[3px] border-[#0d3960] border-l-2">
+            <form onSubmit={getSummary} className="relative bg-blue-300 h-[20%] w-[800px] max-[800px]:w-full flex flex-col items-left rounded-[.6rem] border-b-[5px] border-r-[3px] border-[#0d3960] border-l-2">
                 <input value={input} onChange={(e)=> setInput(e.target.value)} type="text" placeholder="Summarize..." className="bg-transparent placeholder:font-semibold placeholder:text-[#0d3960] w-full p-2 outline-none" />
                 <button className={`text-2xl p-2 w-fit bg-blue-400 hover:bg-blue-500 rounded-[50%] absolute bottom-2 right-2 ${input.trim().length <= 10 && "hidden"}`}><Send /></button>
             </form>

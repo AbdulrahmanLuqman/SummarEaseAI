@@ -1,6 +1,6 @@
 "use client"
 import { FormEvent, useState, useEffect } from "react"
-import { Send } from "../components/Icons"
+import { Send, Spinner } from "../components/Icons"
 import { getItem, setItem } from "../utils/localStorage"
 
 interface Message {
@@ -46,9 +46,7 @@ export default function Translate(){
     };
 
     const translateText = async (text: string, sourceLang: string, targetLang: string) => {
-        if (typeof window === "undefined" || !window.ai?.translator) {
-            return;
-        }
+        if (typeof window === "undefined" || !window.ai?.translator) return;
         try {
             const translator = await window.ai.translator.create({
                 sourceLanguage: sourceLang,
@@ -154,34 +152,40 @@ export default function Translate(){
     };
 
     const clearChat = ()=> {
-        setMessages([]);
+        setMessages([
+            {
+                text: "Hello, Let's do some translations",
+                sender: "AI",
+                date: `${date.getHours()}:${date.getMinutes()}`,
+                detectedLanguage: "en"
+            }
+        ]);
     }
 
-    console.log(messages)
+    // console.log(messages)
       
     return (
         <div className="w-full h-screen flex flex-col gap-5 items-center p-4">
-            <div className="h-[80%] w-[800px] max-[800px]:w-full overflow-auto space-y-2">
+            <div className="h-[80%] w-[800px] max-[800px]:w-full overflow-auto space-y-2 pt-5">
                 {
                     messages.map((msg, index)=> 
                     <div 
                       key={index}
                       className={`
-                        w-fit px-4 py-2 pb-6 rounded-md text-white relative
+                        w-fit max-w-[90%] px-4 py-2 pb-6 rounded-md text-white relative
                         ${msg.sender === "user" ? "bg-blue-500 ml-auto" : "bg-blue-600 font-semibold"}
                       `}>
                         <p className="">
-                            {
-                                msg.sender === "AI" && <span>{isLoading ? "Loading: " : "Translation: "}</span>
-                            }
+                            
                             {msg.text} 
                             <span className="font-normal">({msg.detectedLanguage})</span>
                             
                         </p>
                         <span className="absolute bottom-1 right-2 text-sm font-normal">{msg.date}</span>
-                    </div>
-                    )
+                    </div> 
+                    )   
                 }
+                <span>{isLoading && <Spinner />}</span>
             </div>
             
 
